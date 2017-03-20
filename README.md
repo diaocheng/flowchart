@@ -1,2 +1,2 @@
 # flowchart
-this is a flowchart library
+a flowchart library
