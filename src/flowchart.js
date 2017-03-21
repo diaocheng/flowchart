@@ -1,5 +1,5 @@
 export default class Flowchart {
-    constructor() {
-        console.log('---------------------');
-    }
+  constructor() {
+    console.log('---------------------');
+  }
 }
