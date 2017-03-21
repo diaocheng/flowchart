@@ -24,6 +24,10 @@ module.exports = {
     // 末尾分号
     'semi': ['error', 'always'],
     // 函数括号前面是否有空格
-    'space-before-function-paren': ['error', 'never']
+    'space-before-function-paren': ['error', {
+      'anonymous': 'always',
+      'named': 'never',
+      'asyncArrow': 'always'
+    }]
   }
 }
