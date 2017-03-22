@@ -9,7 +9,6 @@ module.exports = webpackMerge(baseWebpackConfig, {
   },
   output: {
     path: path.join(__dirname, '../dist'),
-    publicPath: '/',
     filename: '[name].js',
     libraryTarget: 'umd',
     library: 'flowchart'
