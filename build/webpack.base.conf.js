@@ -2,11 +2,6 @@ const path = require('path');
 const eslintFriendlyFormatter = require('eslint-friendly-formatter');
 
 module.exports = {
-  output: {
-    path: path.join(__dirname, '../dist'),
-    publicPath: '/',
-    filename: '[name].js'
-  },
   resolve: {
     extensions: ['.js', '.json'],
     modules: [
