@@ -1,42 +1,46 @@
 import * as d3 from 'd3';
 
 export default class Flowchart {
-  constructor(el, options) {
+  static version = process.env.VERSION;
+  constructor(el, data, options) {
     this.paper = d3.select(el)
-      .append('svg');
+      .append('svg')
+      .attr('width', window.innerWidth)
+      .attr('height', window.innerHeight);
+    this.data = data;
     this.render();
   }
   render() {
-    this.paper
+    const group = this.paper
       .selectAll('g')
-      .data([1, 2, 3])
+      .data(this.data)
       .enter()
-      .append('g')
+      .append('g');
+    const shape = group
       .append('rect')
-      .attr('width', 200)
+      .attr('width', 300)
       .attr('height', 30)
-      .attr('fill', 'steelblue')
+      .attr('fill', '#08f')
       .attr('y', function (d, i) {
-        return 0;
-      })
-      .append('text')
-      .attr('fill', 'white')
-      .attr('text-anchor', 'middle')
-      .attr('transform', 'translate(30,20)')
-      .attr('x', function (d, i) {
-        return 0;
-      })
-      .attr('y', function (d) {
-        return 0;
-      })
-      .attr('dx', function () {
-        return 0;
-      })
-      .attr('dy', function (d) {
-        return 0;
-      })
-      .text(function () {
-        return 'sadas';
+        return i * 32;
       });
+    const text = group
+      .append('text')
+      .data(this.data)
+      .attr('font-size', '16px')
+      .attr('text-anchor', 'start')
+      .attr('x', 10)
+      .attr('y', function (d, i) {
+        return i * 32 + 20;
+      })
+      .attr('fill', '#fff')
+      .text(function (d) {
+        return d.text;
+      });
+    this.shape = {
+      group,
+      shape,
+      text
+    };
   }
 }

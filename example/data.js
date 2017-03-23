@@ -1,0 +1,43 @@
+export default [{
+  "id": 1,
+  "to": [2],
+  "type": "start",
+  "text": "开始",
+  "data": {}
+}, {
+  "id": 2,
+  "to": [3, 4],
+  "type": "operation",
+  "text": "几个操作同时进行的情况",
+  "data": {}
+}, {
+  "id": 3,
+  "to": [5],
+  "type": "operation",
+  "text": "主要工序",
+  "data": {}
+}, {
+  "id": 4,
+  "to": [5],
+  "type": "operation",
+  "text": "第一个工序",
+  "data": {}
+}, {
+  "id": 5,
+  "to": [6],
+  "type": "operation",
+  "text": "第二个工序",
+  "data": {}
+}, {
+  "id": 6,
+  "to": [7],
+  "type": "condition",
+  "text": "以上工作是否都已完成",
+  "data": {}
+}, {
+  "id": 7,
+  "to": [],
+  "type": "end",
+  "text": "结束",
+  "data": {}
+}]
