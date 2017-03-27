@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import clone from 'lodash/cloneDeep';
 
 export default class Flowchart {
   static version = process.env.VERSION;
@@ -9,11 +8,24 @@ export default class Flowchart {
       .attr('width', window.innerWidth)
       .attr('height', window.innerHeight);
     this.data = this.format(data);
-    // this.render(d3.hierarchy(this.data));
+    this.render(d3.hierarchy(this.data));
     return this;
   }
   format(data) {
-    function next(node) {
+    data.forEach((node) => {
+      // 上一个节点
+      if (!Array.isArray(node.parent)) {
+        node.parent = [];
+      }
+      node.prev.forEach((id) => {
+        for (let i = 0, length = data.length; i < length; i++) {
+          if (data[i].id === id) {
+            node.parent.push(data[i]);
+            break;
+          }
+        }
+      });
+
       // 下一个节点
       if (!Array.isArray(node.children)) {
         node.children = [];
@@ -21,24 +33,16 @@ export default class Flowchart {
       node.next.forEach((id) => {
         for (let i = 0, length = data.length; i < length; i++) {
           if (data[i].id === id) {
-            node.children.push(next(data[i]));
+            node.children.push(data[i]);
             break;
           }
         }
       });
-      const temp = clone(node);
-      return {
-        id: temp.id,
-        children: temp.children,
-        text: temp.text,
-        type: temp.type,
-        data: temp.data
-      };
-    }
+    });
     // 返回第一个节点
     for (let i = 0, length = data.length; i < length; i++) {
       if (data[i].prev.length === 0) {
-        return next(data[i]);
+        return data[i];
       }
     }
   }
