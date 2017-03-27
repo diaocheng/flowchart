@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import clone from 'lodash/cloneDeep';
 
 export default class Flowchart {
   static version = process.env.VERSION;
@@ -7,40 +8,46 @@ export default class Flowchart {
       .append('svg')
       .attr('width', window.innerWidth)
       .attr('height', window.innerHeight);
-    this.data = data;
-    this.render();
+    this.data = this.format(data);
+    // this.render(d3.hierarchy(this.data));
+    return this;
   }
-  render() {
-    const group = this.paper
-      .selectAll('g')
-      .data(this.data)
-      .enter()
-      .append('g');
-    const shape = group
-      .append('rect')
-      .attr('width', 300)
-      .attr('height', 30)
-      .attr('fill', '#08f')
-      .attr('y', function (d, i) {
-        return i * 32;
+  format(data) {
+    function next(node) {
+      // 下一个节点
+      if (!Array.isArray(node.children)) {
+        node.children = [];
+      }
+      node.next.forEach((id) => {
+        for (let i = 0, length = data.length; i < length; i++) {
+          if (data[i].id === id) {
+            node.children.push(next(data[i]));
+            break;
+          }
+        }
       });
-    const text = group
-      .append('text')
-      .data(this.data)
-      .attr('font-size', '16px')
-      .attr('text-anchor', 'start')
-      .attr('x', 10)
-      .attr('y', function (d, i) {
-        return i * 32 + 20;
-      })
-      .attr('fill', '#fff')
-      .text(function (d) {
-        return d.text;
+      const temp = clone(node);
+      return {
+        id: temp.id,
+        children: temp.children,
+        text: temp.text,
+        type: temp.type,
+        data: temp.data
+      };
+    }
+    // 返回第一个节点
+    for (let i = 0, length = data.length; i < length; i++) {
+      if (data[i].prev.length === 0) {
+        return next(data[i]);
+      }
+    }
+  }
+  render(data) {
+    const d = d3.tree(data).size(500, 400)
+      .nodeSize(50, 50)
+      .separation((a, b) => {
+        return (a.parent === b.parent ? 1 : 2) / a.depth;
       });
-    this.shape = {
-      group,
-      shape,
-      text
-    };
+    console.log(d);
   }
 }

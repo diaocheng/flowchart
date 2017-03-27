@@ -25,7 +25,8 @@
   },
   "homepage": "https://github.com/diaocheng/flowchart#readme",
   "dependencies": {
-    "d3": "^4.7.3"
+    "d3": "^4.7.3",
+    "lodash": "^4.17.4"
   },
   "devDependencies": {
     "babel-core": "^6.24.0",
