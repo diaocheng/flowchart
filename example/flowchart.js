@@ -1,6 +1,7 @@
 import Flowchart from '../src/flowchart';
 
-const flowchart = new Flowchart('#paper', {
-  width: 400,
-  height: 400
-});
+import data from './data';
+
+const flowchart = new Flowchart('#paper', data, {});
+
+console.log(flowchart);

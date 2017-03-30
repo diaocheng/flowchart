@@ -29,12 +29,12 @@ compiler.plugin('compilation', function (compilation) {
 
 app.use(devMiddleware);
 app.use(hotMiddleware);
+app.use(express.static('example'));
 
 var uri = `http://127.0.0.1:${port}`;
 devMiddleware.waitUntilValid(function () {
   console.log(`> Listening at ${uri}\n`);
 });
-
 module.exports = app.listen(port, function (error) {
   if (error) {
     console.log(error);
