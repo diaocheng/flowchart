@@ -11,6 +11,12 @@ export default class Flowchart extends Selector {
       .attr('width', $selector.$el.offsetWidth)
       .attr('height', $selector.$el.offsetHeight);
     this.$el = $el;
+    $el.append('rect')
+      .attr('x', 300)
+      .attr('y', 200)
+      .attr('width', 40)
+      .attr('height', 40)
+      .attr('fill', 'pink');
     return this;
   }
   data(data) {
