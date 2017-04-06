@@ -17,8 +17,6 @@ module.exports = {
   'extends': 'standard',
   // 规则
   'rules': {
-    // 箭头函数变量括号
-    'arrow-parens': ['error', 'always'],
     // generator函数名与function的空格
     'generator-star-spacing': 0,
     // 末尾分号

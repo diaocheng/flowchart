@@ -1,26 +1,68 @@
 export default class Selector {
-  $namespace = 'http://www.w3.org/2000/svg';
+  static namespace = 'http://www.w3.org/2000/svg';
   constructor($el) {
-    this.$el = $el;
+    this.$el = Array.isArray($el) ? $el : [$el];
     return this;
   }
+  get width() {
+    return this.$el[0] ? this.$el[0].offsetWidth : undefined;
+  }
+  get height() {
+    return this.$el[0] ? this.$el[0].offsetHeight : undefined;
+  }
   select(selector) {
-    if (selector instanceof HTMLElement) {
+    if (selector instanceof Selector) {
       return selector;
     }
-    const $el = document.querySelector(selector);
+    const $el = selector instanceof Element
+      ? selector
+      : (this.$el
+        ? this.$el[0].querySelector(selector)
+        : document.querySelector(selector));
+    return new Selector($el);
+  }
+  selectAll(selector) {
+    if (selector instanceof Selector) {
+      return selector;
+    }
+    const $el = selector instanceof Element
+      ? selector
+      : (this.$el
+        ? this.$el.map(item => { return item.querySelector(selector); })
+        : document.querySelector(selector));
     return new Selector($el);
   }
   append(el) {
-    const $el = el instanceof HTMLElement
-      ? el
-      : document.createElementNS(this.$namespace, el);
-    this.$el.appendChild($el);
-    return new Selector($el);
+    const $els = this.$el.map(item => {
+      const $el = el instanceof Element
+        ? el
+        : document.createElementNS(Selector.namespace, el);
+      item.appendChild($el);
+      return $el;
+    });
+    return new Selector($els);
   }
-  attr(attribute, value) {
-    this.$el.setAttribute(attribute, value);
+  attr(attr, val) {
+    const attributes = {};
+    if (arguments.length === 2) {
+      attributes[attr] = val;
+    }
+    for (let key in attributes) {
+      this.$el.forEach(item => {
+        item.setAttribute(key, attributes[key]);
+      });
+    }
     return this;
+  }
+  text(text) {
+    const textNode = document.createTextNode(text);
+    this.$el.forEach(item => {
+      item.appendChild(textNode);
+    });
+    return this;
+  }
+  translate(x, y) {
+
   }
   on(event, listener, useCapture = false) {
     this.$el.addEventListenr(event, listener, useCapture);
