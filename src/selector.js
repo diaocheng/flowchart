@@ -1,46 +1,34 @@
-export default class Selector {
+class Selector {
   static namespace = 'http://www.w3.org/2000/svg';
-  constructor($el) {
-    this.$el = Array.isArray($el) ? $el : [$el];
+  constructor(selector) {
+    if (selector instanceof Selector) {
+      return selector;
+    } else if (selector instanceof Array) {
+      this.$el = selector;
+    } else if (selector instanceof Element) {
+      this.$el = [selector];
+    } else if (selector instanceof NodeList) {
+      this.$el = Array.prototype.slice.call(selector);
+    } else {
+      selector = document.querySelectorAll(selector);
+      this.$el = Array.prototype.slice.call(selector);
+    }
     return this;
   }
-  get width() {
-    return this.$el[0] ? this.$el[0].offsetWidth : undefined;
-  }
-  get height() {
-    return this.$el[0] ? this.$el[0].offsetHeight : undefined;
-  }
   select(selector) {
-    if (selector instanceof Selector) {
-      return selector;
-    }
-    const $el = selector instanceof Element
-      ? selector
-      : (this.$el
-        ? this.$el[0].querySelector(selector)
-        : document.querySelector(selector));
-    return new Selector($el);
-  }
-  selectAll(selector) {
-    if (selector instanceof Selector) {
-      return selector;
-    }
-    const $el = selector instanceof Element
-      ? selector
-      : (this.$el
-        ? this.$el.map(item => { return item.querySelector(selector); })
-        : document.querySelector(selector));
-    return new Selector($el);
+    const $selector = [];
+    this.$el.forEach($el => {
+      Array.prototype.push.apply($selector, $el.querySelectorAll(selector));
+    });
+    return new Selector($selector);
   }
   append(el) {
-    const $els = this.$el.map(item => {
-      const $el = el instanceof Element
-        ? el
-        : document.createElementNS(Selector.namespace, el);
-      item.appendChild($el);
-      return $el;
+    const $selector = this.$el.map($el => {
+      const node = document.createElementNS(Selector.namespace, el);
+      $el.appendChild(node);
+      return node;
     });
-    return new Selector($els);
+    return new Selector($selector);
   }
   attr(attr, val) {
     const attributes = {};
@@ -61,9 +49,7 @@ export default class Selector {
     });
     return this;
   }
-  translate(x, y) {
-
-  }
+  translate(x, y) { }
   on(event, listener, useCapture = false) {
     this.$el.addEventListenr(event, listener, useCapture);
     return this;
@@ -71,4 +57,8 @@ export default class Selector {
   off(event, listener, useCapture = false) {
     this.$el.removeEventListenr(event, listener, useCapture);
   }
+}
+// 导出选择符函数
+export default function (selector) {
+  return new Selector(selector);
 }

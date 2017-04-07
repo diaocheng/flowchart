@@ -1,20 +1,19 @@
-import Selector from './selector';
+import $ from './selector';
 import { format } from './utils';
 
-export default class Flowchart extends Selector {
+export default class Flowchart {
   static version = process.env.VERSION;
   constructor(selector) {
-    super();
     this.$el = null;
     this.$nodes = [];
     this.$node = null;
     this.$shapes = [];
 
-    const $selector = this.select(selector);
+    const $selector = $(selector);
     const $el = $selector
       .append('svg');
     this.$el = $el;
-    this.size($selector.width, $selector.height);
+    this.size(1000, 600);
     return this;
   }
   size(width, height) {
@@ -50,6 +49,7 @@ export default class Flowchart extends Selector {
       $shape.attr('transform', `translate(${80 * index},${80 * index})`);
       this.$shapes.push($shape);
     });
+    console.log(this.$el.select('g'));
     return this;
   }
 }
