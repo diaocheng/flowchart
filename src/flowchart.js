@@ -9,7 +9,8 @@ export default class Flowchart {
     this.$node = null;
     this.$shapes = [];
 
-    return this.init(selector);
+    this.init(selector);
+    return this;
   }
   init(selector) {
     const $selector = $(selector);
@@ -42,42 +43,58 @@ export default class Flowchart {
     return this;
   }
   render(data) {
-    this.$shapes = this.$nodes.map((node, index) => {
-      const $shape = this.$el.append('g');
-      $shape.append('rect')
-        .attr('width', 80)
-        .attr('height', 80)
-        .attr('fill', 'pink');
-      $shape.append('text')
-        .attr('text-anchor', 'start')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('font-size', 14)
-        .attr('font-family', '微软雅黑')
-        .attr('fill', '#000')
-        .text(node.text);
-      $shape.attr('transform', `translate(${80 * index},${80 * index})`);
-      return $shape;
-    });
+    // this.$shapes = this.$nodes.map((node, index) => {
+    //   const $shape = this.$el.append('g')
+    //     .attr('stroke-width', 5);
+    //   const $a = $shape.append('a')
+    //     .attr('href', function ($el, index) {
+    //       return `#${index}`;
+    //     })
+    //     .attr('name', function ($el, index) {
+    //       return index;
+    //     })
+    //     .attr('width', 60)
+    //     .attr('height', 60);
+    //   $a.append('rect')
+    //     .attr('width', 80)
+    //     .attr('height', 80)
+    //     .attr('fill', 'pink');
+    //   $a.append('text')
+    //     .attr('text-anchor', 'start')
+    //     .attr('x', 0)
+    //     .attr('y', 0)
+    //     .attr('font-size', 14)
+    //     .attr('font-family', '微软雅黑')
+    //     .attr('fill', '#000')
+    //     .text(node.text);
+    //   $shape.translate(80 * index, 80 * index);
+    //   return $shape;
+    // });
 
-    // this.$shapes = this.$nodes.map((item, index) => {
-    //   return this.$el.append('g');
-    // });
-    // const $shapes = this.$el.select('g').attr('transform', function ($el, index, selector) {
-    //   return `translate(${80 * index},${80 * index})`;
-    // });
-    // $shapes.append('rect')
-    //   .attr('width', 80)
-    //   .attr('height', 80)
-    //   .attr('fill', 'pink');
-    // $shapes.append('text')
-    //   .attr('text-anchor', 'start')
-    //   .attr('x', 0)
-    //   .attr('y', 0)
-    //   .attr('font-size', 14)
-    //   .attr('font-family', '微软雅黑')
-    //   .attr('fill', '#000')
-    //   .text('sdsdsds');
+    this.$shapes = this.$nodes.map((item, index) => {
+      return this.$el.append('g');
+    });
+    const $shapes = this.$el.select('g').attr('transform', function ($el, index, selector) {
+      return `translate(${80 * index},${80 * index})`;
+    });
+    const $a = $shapes.append('a')
+      .attr('href', function ($el, index) {
+        return `#${index}`;
+      })
+      .attr('width', 60)
+      .attr('height', 60);
+    $a.append('rect')
+      .attr('width', 80)
+      .attr('height', 80)
+      .attr('fill', 'pink');
+    $a.append('text')
+      .attr('text-anchor', 'start')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('font-size', 14)
+      .attr('font-family', '微软雅黑')
+      .attr('fill', '#000')
+      .text('sdsdsds');
 
     return this;
   }

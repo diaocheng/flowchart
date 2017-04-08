@@ -10,6 +10,8 @@ export default class Selector {
   static namespaces = namespaces;
   static SELECTOR = 0;
   constructor(selector) {
+    this.length = 0;
+
     let $el = [];
     if (selector instanceof Selector) {
       $el = selector;
@@ -28,8 +30,8 @@ export default class Selector {
         $el[i].__SELECTOR__ = Selector.SELECTOR++;
       }
       this[i] = $el[i];
+      this.length++;
     }
-    this.length = $el.length;
     return this;
   }
   /**
@@ -108,7 +110,6 @@ export default class Selector {
    * @param {String|Function} val
    */
   attr(name, val) {
-    // 判断是否为命名标签属性 //
     let namespace = name;
     // 命名空间与标签的分隔符':'的位置
     const i = name.indexOf(':');
@@ -140,6 +141,13 @@ export default class Selector {
     });
     return this;
   }
+  data() {
+
+  }
+  /**
+   * 向节点插入文字
+   * @param {String} text
+   */
   text(text) {
     this.each($el => {
       const textNode = document.createTextNode(text);
@@ -147,12 +155,29 @@ export default class Selector {
     });
     return this;
   }
-  translate(x, y) { }
+  translate(x, y) {
+    this.attr('transform', `translate(${x},${y})`);
+    return this;
+  }
+  shift() {
+
+  }
+  shiftX() {
+
+  }
+  shiftY() {
+
+  }
   on(event, listener, useCapture = false) {
-    this.$el.addEventListenr(event, listener, useCapture);
+    this.each($el => {
+      $el.addEventListenr(event, listener, useCapture);
+    });
     return this;
   }
   off(event, listener, useCapture = false) {
-    this.$el.removeEventListenr(event, listener, useCapture);
+    this.each($el => {
+      $el.removeEventListenr(event, listener, useCapture);
+    });
+    return this;
   }
 }
