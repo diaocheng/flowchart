@@ -1,57 +1,84 @@
-import * as d3 from 'd3';
+import $ from './selector';
+import { format } from './utils';
 
 export default class Flowchart {
   static version = process.env.VERSION;
-  constructor(el, data, options) {
-    this.paper = d3.select(el)
-      .append('svg')
-      .attr('width', window.innerWidth)
-      .attr('height', window.innerHeight);
-    this.data = this.format(data);
-    this.render(d3.hierarchy(this.data));
+  constructor(selector) {
+    this.$el = null;
+    this.$nodes = [];
+    this.$node = null;
+    this.$shapes = [];
+
+    return this.init(selector);
+  }
+  init(selector) {
+    const $selector = $(selector);
+    this.$el = $selector.append('svg');
+    this.size($selector[0].clientWidth, $selector[0].clientHeight);
+    // 定时器
+    let timer = null;
+    window.addEventListener('resize', e => {
+      timer && clearTimeout(timer);
+      // 防止一直执行，造成运算量增加
+      timer = setTimeout(() => {
+        this.size($selector[0].clientWidth, $selector[0].clientHeight);
+      }, 300);
+    });
     return this;
   }
-  format(data) {
-    data.forEach((node) => {
-      // 上一个节点
-      if (!Array.isArray(node.parent)) {
-        node.parent = [];
-      }
-      node.prev.forEach((id) => {
-        for (let i = 0, length = data.length; i < length; i++) {
-          if (data[i].id === id) {
-            node.parent.push(data[i]);
-            break;
-          }
-        }
-      });
-
-      // 下一个节点
-      if (!Array.isArray(node.children)) {
-        node.children = [];
-      }
-      node.next.forEach((id) => {
-        for (let i = 0, length = data.length; i < length; i++) {
-          if (data[i].id === id) {
-            node.children.push(data[i]);
-            break;
-          }
-        }
-      });
-    });
-    // 返回第一个节点
-    for (let i = 0, length = data.length; i < length; i++) {
-      if (data[i].prev.length === 0) {
-        return data[i];
+  size(width, height) {
+    this.$el
+      .attr('width', width)
+      .attr('height', height);
+  }
+  data(data) {
+    this.$nodes = format(data);
+    for (let i = 0, length = this.$nodes.length; i < length; i++) {
+      if (!this.$nodes[i].prev.length) {
+        this.$node = this.$nodes[i];
+        break;
       }
     }
+    return this;
   }
   render(data) {
-    const d = d3.tree(data).size(500, 400)
-      .nodeSize(50, 50)
-      .separation((a, b) => {
-        return (a.parent === b.parent ? 1 : 2) / a.depth;
-      });
-    console.log(d);
+    this.$shapes = this.$nodes.map((node, index) => {
+      const $shape = this.$el.append('g');
+      $shape.append('rect')
+        .attr('width', 80)
+        .attr('height', 80)
+        .attr('fill', 'pink');
+      $shape.append('text')
+        .attr('text-anchor', 'start')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('font-size', 14)
+        .attr('font-family', '微软雅黑')
+        .attr('fill', '#000')
+        .text(node.text);
+      $shape.attr('transform', `translate(${80 * index},${80 * index})`);
+      return $shape;
+    });
+
+    // this.$shapes = this.$nodes.map((item, index) => {
+    //   return this.$el.append('g');
+    // });
+    // const $shapes = this.$el.select('g').attr('transform', function ($el, index, selector) {
+    //   return `translate(${80 * index},${80 * index})`;
+    // });
+    // $shapes.append('rect')
+    //   .attr('width', 80)
+    //   .attr('height', 80)
+    //   .attr('fill', 'pink');
+    // $shapes.append('text')
+    //   .attr('text-anchor', 'start')
+    //   .attr('x', 0)
+    //   .attr('y', 0)
+    //   .attr('font-size', 14)
+    //   .attr('font-family', '微软雅黑')
+    //   .attr('fill', '#000')
+    //   .text('sdsdsds');
+
+    return this;
   }
 }

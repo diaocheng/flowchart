@@ -24,10 +24,7 @@
     "url": "https://github.com/diaocheng/flowchart/issues"
   },
   "homepage": "https://github.com/diaocheng/flowchart#readme",
-  "dependencies": {
-    "d3": "^4.7.3",
-    "lodash": "^4.17.4"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-core": "^6.24.0",
     "babel-eslint": "^7.2.0",
