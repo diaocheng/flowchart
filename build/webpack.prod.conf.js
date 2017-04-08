@@ -15,9 +15,6 @@ module.exports = webpackMerge(baseWebpackConfig, {
     library: 'flowchart',
     umdNamedDefine: true
   },
-  externals: {
-    d3: 'd3'
-  },
   devtool: '#source-map',
   plugins: [
     new webpack.DefinePlugin({

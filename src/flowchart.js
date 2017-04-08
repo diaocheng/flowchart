@@ -9,11 +9,21 @@ export default class Flowchart {
     this.$node = null;
     this.$shapes = [];
 
+    return this.init(selector);
+  }
+  init(selector) {
     const $selector = $(selector);
-    const $el = $selector
-      .append('svg');
-    this.$el = $el;
-    this.size(1000, 600);
+    this.$el = $selector.append('svg');
+    this.size($selector[0].clientWidth, $selector[0].clientHeight);
+    // 定时器
+    let timer = null;
+    window.addEventListener('resize', e => {
+      timer && clearTimeout(timer);
+      // 防止一直执行，造成运算量增加
+      timer = setTimeout(() => {
+        this.size($selector[0].clientWidth, $selector[0].clientHeight);
+      }, 300);
+    });
     return this;
   }
   size(width, height) {
@@ -32,7 +42,7 @@ export default class Flowchart {
     return this;
   }
   render(data) {
-    this.$nodes.forEach((item, index) => {
+    this.$shapes = this.$nodes.map((node, index) => {
       const $shape = this.$el.append('g');
       $shape.append('rect')
         .attr('width', 80)
@@ -45,11 +55,30 @@ export default class Flowchart {
         .attr('font-size', 14)
         .attr('font-family', '微软雅黑')
         .attr('fill', '#000')
-        .text(item.text);
+        .text(node.text);
       $shape.attr('transform', `translate(${80 * index},${80 * index})`);
-      this.$shapes.push($shape);
+      return $shape;
     });
-    console.log(this.$el.select('g'));
+
+    // this.$shapes = this.$nodes.map((item, index) => {
+    //   return this.$el.append('g');
+    // });
+    // const $shapes = this.$el.select('g').attr('transform', function ($el, index, selector) {
+    //   return `translate(${80 * index},${80 * index})`;
+    // });
+    // $shapes.append('rect')
+    //   .attr('width', 80)
+    //   .attr('height', 80)
+    //   .attr('fill', 'pink');
+    // $shapes.append('text')
+    //   .attr('text-anchor', 'start')
+    //   .attr('x', 0)
+    //   .attr('y', 0)
+    //   .attr('font-size', 14)
+    //   .attr('font-family', '微软雅黑')
+    //   .attr('fill', '#000')
+    //   .text('sdsdsds');
+
     return this;
   }
 }
