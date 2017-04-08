@@ -1,51 +1,103 @@
 class Selector {
-  static namespace = 'http://www.w3.org/2000/svg';
+  static namespaces = {
+    svg: 'http://www.w3.org/2000/svg',
+    xhtml: 'http://www.w3.org/1999/xhtml',
+    xlink: 'http://www.w3.org/1999/xlink',
+    xml: 'http://www.w3.org/XML/1998/namespace',
+    xmlns: 'http://www.w3.org/2000/xmlns/'
+  }
   constructor(selector) {
+    let $el = [];
     if (selector instanceof Selector) {
-      return selector;
+      $el = selector;
     } else if (selector instanceof Array) {
-      this.$el = selector;
+      $el = selector;
     } else if (selector instanceof Element) {
-      this.$el = [selector];
+      $el = [selector];
     } else if (selector instanceof NodeList) {
-      this.$el = Array.prototype.slice.call(selector);
+      $el = selector;
     } else {
-      selector = document.querySelectorAll(selector);
-      this.$el = Array.prototype.slice.call(selector);
+      $el = document.querySelectorAll(selector);
+    }
+    for (let i = 0, length = $el.length; i < length; i++) {
+      this[i] = $el[i];
+    }
+    this.length = $el.length;
+    return this;
+  }
+  /**
+   * 遍历对象的元素
+   * @param {Function} callback
+   * @param {*} context
+   */
+  each(callback, context) {
+    for (let i = 0, length = this.length; i < length; i++) {
+      callback.call(context || this[i], this[i], i, this);
     }
     return this;
   }
+  /**
+   * 返回一个新的从原Selector对象Selector对象
+   * @param {Function} callback
+   * @param {*} context
+   */
+  map(callback, context) {
+    const $selector = [];
+    for (let i = 0, length = this.length; i < length; i++) {
+      const $el = callback.call(context || this[i], this[i], i, this);
+      if ($el) {
+        $selector.push($el);
+      }
+    }
+    return new Selector($selector);
+  }
+  /**
+   * 选择元素
+   * @param {String} selector
+   */
   select(selector) {
     const $selector = [];
-    this.$el.forEach($el => {
+    this.each($el => {
       Array.prototype.push.apply($selector, $el.querySelectorAll(selector));
     });
     return new Selector($selector);
   }
+  /**
+   * 插入元素
+   * @param {String} el
+   */
   append(el) {
-    const $selector = this.$el.map($el => {
-      const node = document.createElementNS(Selector.namespace, el);
+    const namespace = 'svg';
+    const $selector = this.map($el => {
+      const node = document.createElementNS(Selector.namespaces[namespace], el);
       $el.appendChild(node);
       return node;
     });
     return new Selector($selector);
   }
-  attr(attr, val) {
-    const attributes = {};
-    if (arguments.length === 2) {
-      attributes[attr] = val;
-    }
-    for (let key in attributes) {
-      this.$el.forEach(item => {
-        item.setAttribute(key, attributes[key]);
+  /**
+   * 设置属性
+   * @param {*} name
+   * @param {*} val
+   */
+  attr(name, val) {
+    if (typeof name === 'string' && val) {
+      this.each($el => {
+        $el.setAttribute(name, val);
       });
+    } else if (typeof name === 'object') {
+      for (let key in name) {
+        this.each($el => {
+          $el.setAttribute(key, name[key]);
+        });
+      }
     }
     return this;
   }
   text(text) {
     const textNode = document.createTextNode(text);
-    this.$el.forEach(item => {
-      item.appendChild(textNode);
+    this.each($el => {
+      $el.appendChild(textNode);
     });
     return this;
   }
