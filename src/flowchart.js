@@ -75,7 +75,7 @@ export default class Flowchart {
       return this.$el.append('g');
     });
     const $shapes = this.$el.select('g').attr('transform', function ($el, index, selector) {
-      return `translate(${80 * index},${80 * index})`;
+      return `translate(${80 * index},${80 * index}) scale(1.8,1.8)`;
     });
     const $a = $shapes.append('a')
       .attr('href', function ($el, index) {
@@ -89,13 +89,17 @@ export default class Flowchart {
       .attr('fill', 'pink');
     $a.append('text')
       .attr('text-anchor', 'start')
-      .attr('x', 0)
-      .attr('y', 0)
       .attr('font-size', 14)
       .attr('font-family', '微软雅黑')
       .attr('fill', '#000')
-      .text('sdsdsds');
-
+      .text('sdsdsds')
+      .attr('x', 0)
+      .attr('y', function ($el, index) {
+        return $el.getBBox().height;
+      });
+    setTimeout(() => {
+      $shapes.shift(20, 20);
+    }, 2000);
     return this;
   }
 }

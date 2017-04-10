@@ -159,14 +159,55 @@ export default class Selector {
     this.attr('transform', `translate(${x},${y})`);
     return this;
   }
-  shift() {
+  translateX(x) {
 
+  }
+  translateY(x) {
+
+  }
+  shift(dx, dy) {
+    this.attr('transform', ($el, index, selector) => {
+      const bbox = $el.getBBox();
+      let transform = $el.getAttribute('transform');
+      transform = transform ? transform.split(' ') : [];
+      let translate;
+      let translateIndex = 0;
+      for (let i = 0, length = transform.length; i < length; i++) {
+        if (transform[i].indexOf('translate(') !== -1) {
+          translateIndex = i;
+          translate = transform[i].match(/\d+,\d+/)[0].split(',');
+          break;
+        }
+      }
+
+      const translateX = translate && translate[0];
+      const translateY = translate && translate[1];
+      bbox.x = bbox.x || translateX;
+      bbox.y = bbox.x || translateY;
+      const x = bbox.x + dx;
+      const y = bbox.y + dy;
+      transform[translateIndex] = `translate(${x},${y})`;
+      return transform.join(' ');
+    });
+    return this;
   }
   shiftX() {
 
   }
   shiftY() {
 
+  }
+  x() {
+    return this[0].getBBox().x;
+  }
+  y() {
+    return this[0].getBBox().y;
+  }
+  width() {
+    return this[0].getBBox().width;
+  }
+  height() {
+    return this[0].getBBox().height;
   }
   on(event, listener, useCapture = false) {
     this.each($el => {
