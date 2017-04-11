@@ -97,9 +97,8 @@ export default class Flowchart {
       .attr('y', function ($el, index) {
         return $el.getBBox().height;
       });
-    setTimeout(() => {
-      $shapes.shift(20, 20);
-    }, 2000);
+    console.log($shapes.x());
+    console.log($shapes.getBBox());
     return this;
   }
 }

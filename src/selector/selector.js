@@ -197,11 +197,88 @@ export default class Selector {
   shiftY() {
 
   }
+
+  // http://stackoverflow.com/questions/13046811/how-to-determine-size-of-raphael-object-after-scaling-rotating-it/13111598#13111598
+  getBBox() {
+    const el = this[1];
+    function pointToLineDist(A, B, P) {
+      let nL = Math.sqrt((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y));
+      return Math.abs((P.x - A.x) * (B.y - A.y) - (P.y - A.y) * (B.x - A.x)) / nL;
+    }
+
+    function dist(point1, point2) {
+      let xs = 0;
+      let ys = 0;
+      xs = point2.x - point1.x;
+      xs = xs * xs;
+      ys = point2.y - point1.y;
+      ys = ys * ys;
+      return Math.sqrt(xs + ys);
+    }
+    let b = el.getBBox();
+    let objDOM = el;
+    let svgDOM = objDOM.ownerSVGElement;
+    // Get the local to global matrix
+    let matrix = svgDOM.getTransformToElement(objDOM).inverse();
+    let oldp = [[b.x, b.y], [b.x + b.width, b.y], [b.x + b.width, b.y + b.height], [b.x, b.y + b.height]];
+    let pt;
+    let newp = [];
+    let i;
+    let pos = Number.POSITIVE_INFINITY;
+    let neg = Number.NEGATIVE_INFINITY;
+    let minX = pos;
+    let minY = pos;
+    let maxX = neg;
+    let maxY = neg;
+
+    for (i = 0; i < 4; i++) {
+      pt = svgDOM.createSVGPoint();
+      pt.x = oldp[i][0];
+      pt.y = oldp[i][1];
+      newp[i] = pt.matrixTransform(matrix);
+      if (newp[i].x < minX) minX = newp[i].x;
+      if (newp[i].y < minY) minY = newp[i].y;
+      if (newp[i].x > maxX) maxX = newp[i].x;
+      if (newp[i].y > maxY) maxY = newp[i].y;
+    }
+    let obj = {};
+
+    // The next refers to the transformed object itself, not bbox
+    // newp[0] - newp[3] are the transformed object's corner
+    // points in clockwise order starting from top left corner
+    obj.newp = newp; // array of corner points
+    obj.width = pointToLineDist(newp[1], newp[2], newp[0]) || 0;
+    obj.height = pointToLineDist(newp[2], newp[3], newp[0]) || 0;
+    obj.toplen = dist(newp[0], newp[1]);
+    obj.rightlen = dist(newp[1], newp[2]);
+    obj.bottomlen = dist(newp[2], newp[3]);
+    obj.leftlen = dist(newp[3], newp[0]);
+    // The next refers to the transformed object's bounding box
+    obj.BBx = minX;
+    obj.BBy = minY;
+    obj.BBx2 = maxX;
+    obj.BBy2 = maxY;
+    obj.BBwidth = maxX - minX;
+    obj.BBheight = maxY - minY;
+    return obj;
+  }
   x() {
-    return this[0].getBBox().x;
+    const $el = this[0];
+    if ($el) {
+      const bbox = $el.getBBox();
+      const clientRect = $el.getBoundingClientRect();
+      return bbox.x || clientRect.left || 0;
+    }
+    return null;
   }
   y() {
-    return this[0].getBBox().y;
+    const $el = this[0];
+    if ($el) {
+      const bbox = $el.getBBox();
+      const clientRect = $el.getBoundingClientRect();
+      return bbox.y || clientRect.top || 0;
+    }
+    return null;
   }
   width() {
     return this[0].getBBox().width;
