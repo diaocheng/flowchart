@@ -75,7 +75,7 @@ export default class Flowchart {
       return this.$el.append('g');
     });
     const $shapes = this.$el.select('g').attr('transform', function ($el, index, selector) {
-      return `translate(${80 * index},${80 * index}) scale(1.8,1.8)`;
+      return `translate(${80 * index},${80 * index}) scale(1.1,1.1) rotate(45)`;
     });
     const $a = $shapes.append('a')
       .attr('href', function ($el, index) {
