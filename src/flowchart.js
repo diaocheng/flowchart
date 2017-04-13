@@ -75,7 +75,7 @@ export default class Flowchart {
       return this.$el.append('g');
     });
     const $shapes = this.$el.select('g').attr('transform', function ($el, index, selector) {
-      return `translate(${80 * index},${80 * index}) scale(1.1,1.1) rotate(45)`;
+      return `translate(${80 * index},${80 * index}) scale(1.1,1.1) translate(${80 * index},${80 * index})`;
     });
     const $a = $shapes.append('a')
       .attr('href', function ($el, index) {
@@ -97,6 +97,27 @@ export default class Flowchart {
       .attr('y', function ($el, index) {
         return $el.getBBox().height;
       });
+    (function move() {
+      setTimeout(() => {
+        $shapes.translate(400, 400);
+        setTimeout(() => {
+          $shapes.translateX(300);
+          setTimeout(() => {
+            $shapes.translateY(300);
+            setTimeout(() => {
+              $shapes.shift(-100, -100);
+              setTimeout(() => {
+                $shapes.shiftX(-100);
+                setTimeout(() => {
+                  $shapes.shiftY(-100);
+                  move();
+                }, 1000);
+              }, 1000);
+            }, 1000);
+          }, 1000);
+        }, 1000);
+      }, 2000);
+    })();
     console.log($shapes.x());
     console.log($shapes.getBBox());
     return this;

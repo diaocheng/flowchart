@@ -141,9 +141,6 @@ export default class Selector {
     });
     return this;
   }
-  data() {
-
-  }
   /**
    * 向节点插入文字
    * @param {String} text
@@ -155,57 +152,88 @@ export default class Selector {
     });
     return this;
   }
-  translate(x, y) {
-    this.attr('transform', `translate(${x},${y})`);
-    return this;
-  }
-  translateX(x) {
-
-  }
-  translateY(x) {
-
-  }
-  shift(dx, dy) {
-    this.attr('transform', ($el, index, selector) => {
-      const bbox = $el.getBBox();
+  translate(x, y, fn) {
+    this.attr('transform', ($el, index, select) => {
       let transform = $el.getAttribute('transform');
       transform = transform ? transform.split(' ') : [];
-      let translate;
-      let translateIndex = 0;
-      for (let i = 0, length = transform.length; i < length; i++) {
-        if (transform[i].indexOf('translate(') !== -1) {
-          translateIndex = i;
-          translate = transform[i].match(/\d+,\d+/)[0].split(',');
-          break;
+      let ox = 0;
+      let oy = 0;
+      transform = transform.filter((item, index) => {
+        if (item.indexOf('translate') === -1) {
+          return item;
+        } else {
+          const translate = item.match(/\d+,\d+/)[0].split(',');
+          ox += parseInt(translate[0]) || 0;
+          oy += parseInt(translate[1]) || 0;
         }
+      });
+      if (typeof fn === 'function') {
+        // 传入新的值和原来的值，并返回求得的值
+        const translate = fn({ x, y }, { x: ox, y: oy });
+        x = translate.x;
+        y = translate.y;
       }
-
-      const translateX = translate && translate[0];
-      const translateY = translate && translate[1];
-      bbox.x = bbox.x || translateX;
-      bbox.y = bbox.x || translateY;
-      const x = bbox.x + dx;
-      const y = bbox.y + dy;
-      transform[translateIndex] = `translate(${x},${y})`;
+      transform.push(`translate(${x},${y})`);
       return transform.join(' ');
     });
     return this;
   }
-  shiftX() {
-
+  translateX(x) {
+    this.translate(x, 0, (nVal, oVal) => {
+      return {
+        x: nVal.x,
+        y: oVal.y
+      };
+    });
+    return this;
   }
-  shiftY() {
-
+  translateY(y) {
+    this.translate(0, y, (nVal, oVal) => {
+      return {
+        x: oVal.x,
+        y: nVal.y
+      };
+    });
+    return this;
   }
-
+  shift(dx, dy) {
+    this.attr('transform', ($el, index, select) => {
+      let transform = $el.getAttribute('transform');
+      transform = transform ? transform.split(' ') : [];
+      let x = dx;
+      let y = dy;
+      transform = transform.filter((item, index) => {
+        if (item.indexOf('translate') === -1) {
+          return item;
+        } else {
+          const translate = item.match(/\d+,\d+/)[0].split(',');
+          x += parseInt(translate[0]) || 0;
+          y += parseInt(translate[1]) || 0;
+        }
+      });
+      transform.push(`translate(${x},${y})`);
+      return transform.join(' ');
+    });
+    return this;
+  }
+  shiftX(dx) {
+    this.shift(dx, 0);
+    return this;
+  }
+  shiftY(dy) {
+    this.shift(0, dy);
+    return this;
+  }
   // http://stackoverflow.com/questions/13046811/how-to-determine-size-of-raphael-object-after-scaling-rotating-it/13111598#13111598
   getBBox() {
     const $el = this[0];
+    if (!$el) {
+      return null;
+    }
 
     let bbox = $el.getBBox();
     let $svg = $el.ownerSVGElement;
-    // 得到相对画布的坐标
-    const matrix = $el.getScreenCTM().inverse().multiply($svg.getScreenCTM());
+
     // 相对于全局的坐标点
     const oldPoint = [
       { x: bbox.x, y: bbox.y },
@@ -214,15 +242,14 @@ export default class Selector {
       { x: bbox.x, y: bbox.y + bbox.height }
     ];
     // 正无穷
-    const POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
     // 负无穷
-    const NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
 
-    let minX = POSITIVE_INFINITY;
-    let minY = POSITIVE_INFINITY;
-    let maxX = NEGATIVE_INFINITY;
-    let maxY = NEGATIVE_INFINITY;
-
+    // 得到相对画布的坐标
+    const matrix = $el.getScreenCTM().inverse().multiply($svg.getScreenCTM());
     for (let i = 0, length = oldPoint.length; i < length; i++) {
       let point = $svg.createSVGPoint();
       point.x = oldPoint[i].x;
@@ -251,28 +278,32 @@ export default class Selector {
     };
   }
   x() {
-    const $el = this[0];
-    if ($el) {
-      const bbox = $el.getBBox();
-      const clientRect = $el.getBoundingClientRect();
-      return bbox.x || clientRect.left || 0;
+    const bbox = this.getBBox();
+    if (!bbox) {
+      return null;
     }
-    return null;
+    return bbox.x;
   }
   y() {
-    const $el = this[0];
-    if ($el) {
-      const bbox = $el.getBBox();
-      const clientRect = $el.getBoundingClientRect();
-      return bbox.y || clientRect.top || 0;
+    const bbox = this.getBBox();
+    if (!bbox) {
+      return null;
     }
-    return null;
+    return bbox.y;
   }
   width() {
-    return this[0].getBBox().width;
+    const bbox = this.getBBox();
+    if (!bbox) {
+      return null;
+    }
+    return bbox.width;
   }
   height() {
-    return this[0].getBBox().height;
+    const bbox = this.getBBox();
+    if (!bbox) {
+      return null;
+    }
+    return bbox.height;
   }
   on(event, listener, useCapture = false) {
     this.each($el => {
