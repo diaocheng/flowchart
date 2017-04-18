@@ -153,76 +153,157 @@ export default class Selector {
     return this;
   }
   translate(x, y, fn) {
-    this.attr('transform', ($el, index, select) => {
+    this.attr('transform', ($el, index, selector) => {
       let transform = $el.getAttribute('transform');
       transform = transform ? transform.split(' ') : [];
+
+      // 防止改变全局x,y值
+      let $x = x;
+      let $y = y;
+
       let ox = 0;
       let oy = 0;
-      transform = transform.filter((item, index) => {
+      transform = transform.filter(item => {
         if (item.indexOf('translate') === -1) {
-          return item;
+          return true;
         } else {
           const translate = item.match(/\d+,\d+/)[0].split(',');
-          ox += parseInt(translate[0]) || 0;
-          oy += parseInt(translate[1]) || 0;
+          ox += parseFloat(translate[0]) || 0;
+          oy += parseFloat(translate[1]) || 0;
         }
       });
+
       if (typeof fn === 'function') {
         // 传入新的值和原来的值，并返回求得的值
-        const translate = fn({ x, y }, { x: ox, y: oy });
-        x = translate.x;
-        y = translate.y;
+        const nVal = { x: $x, y: $y };
+        const oVal = { x: ox, y: oy };
+        const translate = fn.call(this, nVal, oVal, $el, index, selector);
+        $x = translate.x;
+        $y = translate.y;
       }
-      transform.push(`translate(${x},${y})`);
+
+      transform.push(`translate(${$x},${$y})`);
       return transform.join(' ');
     });
     return this;
   }
-  translateX(x) {
-    this.translate(x, 0, (nVal, oVal) => {
-      return {
+  translateX(x, fn) {
+    this.translate(x, 0, (nVal, oVal, $el, index, selector) => {
+      let val = {
         x: nVal.x,
         y: oVal.y
       };
+      if (typeof fn === 'function') {
+        val = fn.call(this, nVal, oVal, $el, index, selector) || val;
+      }
+      return val;
     });
     return this;
   }
-  translateY(y) {
-    this.translate(0, y, (nVal, oVal) => {
-      return {
+  translateY(y, fn) {
+    this.translate(0, y, (nVal, oVal, $el, index, selector) => {
+      let val = {
         x: oVal.x,
         y: nVal.y
       };
+      if (typeof fn === 'function') {
+        val = fn.call(this, nVal, oVal, $el, index, selector) || val;
+      }
+      return val;
     });
     return this;
   }
-  shift(dx, dy) {
+  shift(dx, dy, fn) {
+    this.translate(0, 0, (nVal, oVal, $el, index, selector) => {
+      let val = {
+        x: nVal.x + oVal.x,
+        y: nVal.y + oVal.y
+      };
+      if (typeof fn === 'function') {
+        val = fn.call(this, nVal, oVal, $el, index, selector) || val;
+      }
+      return val;
+    });
+    return this;
+  }
+  shiftX(dx, fn) {
+    this.shift(dx, 0, (nVal, oVal, $el, index, selector) => {
+      let val = {
+        x: nVal.x + oVal.x,
+        y: oVal.y
+      };
+      if (typeof fn === 'function') {
+        const x = fn.call(this, nVal.x, oVal.x, $el, index, selector);
+        if (typeof x === 'number') {
+          val.x = x;
+        }
+      }
+      return val;
+    });
+    return this;
+  }
+  shiftY(dy, fn) {
+    this.shift(0, dy, (nVal, oVal, $el, index, selector) => {
+      let val = {
+        x: oVal.x,
+        y: nVal.y + oVal.y
+      };
+      if (typeof fn === 'function') {
+        const y = fn.call(this, nVal.y, oVal.y, $el, index, selector);
+        if (typeof y === 'number') {
+          val.y = y;
+        }
+      }
+      return val;
+    });
+    return this;
+  }
+  rotate(angle, fn) {
     this.attr('transform', ($el, index, select) => {
       let transform = $el.getAttribute('transform');
       transform = transform ? transform.split(' ') : [];
-      let x = dx;
-      let y = dy;
+
+      let nVal = angle;
+      let oVal = 0;
       transform = transform.filter((item, index) => {
-        if (item.indexOf('translate') === -1) {
-          return item;
+        if (item.indexOf('rotate') === -1) {
+          return true;
         } else {
-          const translate = item.match(/\d+,\d+/)[0].split(',');
-          x += parseInt(translate[0]) || 0;
-          y += parseInt(translate[1]) || 0;
+          const rotate = item.match(/\d+/)[0];
+          oVal += parseFloat(rotate);
         }
       });
-      transform.push(`translate(${x},${y})`);
+      if (typeof fn === 'function') {
+        nVal = fn(nVal, oVal);
+      }
+      transform.push(`rotate(${nVal})`);
       return transform.join(' ');
     });
     return this;
   }
-  shiftX(dx) {
-    this.shift(dx, 0);
+  rotateTo(angle) {
+    this.attr('transform', ($el, index, select) => {
+      let transform = $el.getAttribute('transform');
+      transform = transform ? transform.split(' ') : [];
+
+      transform = transform.filter((item, index) => {
+        if (item.indexOf('rotate') === -1) {
+          return true;
+        }
+      });
+      transform.push(`rotate(${angle})`);
+      return transform.join(' ');
+    });
     return this;
   }
-  shiftY(dy) {
-    this.shift(0, dy);
-    return this;
+  scale(rx, ry) {
+
+  }
+  scaleX(rx) {
+
+  }
+  scaleY(ry) {
+
   }
   // http://stackoverflow.com/questions/13046811/how-to-determine-size-of-raphael-object-after-scaling-rotating-it/13111598#13111598
   getBBox() {
