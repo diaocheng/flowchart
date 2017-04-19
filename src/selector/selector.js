@@ -152,7 +152,13 @@ export default class Selector {
     });
     return this;
   }
-  translate(x, y, fn) {
+  /**
+   * 移动到指定位置
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Function} callback
+   */
+  translate(x, y, callback) {
     this.attr('transform', ($el, index, selector) => {
       let transform = $el.getAttribute('transform');
       transform = transform ? transform.split(' ') : [];
@@ -173,11 +179,11 @@ export default class Selector {
         }
       });
 
-      if (typeof fn === 'function') {
+      if (typeof callback === 'function') {
         // 传入新的值和原来的值，并返回求得的值
         const nVal = { x: $x, y: $y };
         const oVal = { x: ox, y: oy };
-        const translate = fn.call(this, nVal, oVal, $el, index, selector);
+        const translate = callback.call(this, nVal, oVal, $el, index, selector);
         $x = translate.x;
         $y = translate.y;
       }
@@ -187,53 +193,74 @@ export default class Selector {
     });
     return this;
   }
-  translateX(x, fn) {
+  /**
+   * 移动x到指定位置
+   * @param {Number} x
+   * @param {Function} callback
+   */
+  translateX(x, callback) {
     this.translate(x, 0, (nVal, oVal, $el, index, selector) => {
       let val = {
         x: nVal.x,
         y: oVal.y
       };
-      if (typeof fn === 'function') {
-        val = fn.call(this, nVal, oVal, $el, index, selector) || val;
+      if (typeof callback === 'function') {
+        val = callback.call(this, nVal, oVal, $el, index, selector) || val;
       }
       return val;
     });
     return this;
   }
-  translateY(y, fn) {
+  /**
+   * 移动y到指定位置
+   * @param {Number} y
+   * @param {Function} callback
+   */
+  translateY(y, callback) {
     this.translate(0, y, (nVal, oVal, $el, index, selector) => {
       let val = {
         x: oVal.x,
         y: nVal.y
       };
-      if (typeof fn === 'function') {
-        val = fn.call(this, nVal, oVal, $el, index, selector) || val;
+      if (typeof callback === 'function') {
+        val = callback.call(this, nVal, oVal, $el, index, selector) || val;
       }
       return val;
     });
     return this;
   }
-  shift(dx, dy, fn) {
+  /**
+   * 移动指定距离
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Function} callback
+   */
+  shift(x, y, callback) {
     this.translate(0, 0, (nVal, oVal, $el, index, selector) => {
       let val = {
         x: nVal.x + oVal.x,
         y: nVal.y + oVal.y
       };
-      if (typeof fn === 'function') {
-        val = fn.call(this, nVal, oVal, $el, index, selector) || val;
+      if (typeof callback === 'function') {
+        val = callback.call(this, nVal, oVal, $el, index, selector) || val;
       }
       return val;
     });
     return this;
   }
-  shiftX(dx, fn) {
-    this.shift(dx, 0, (nVal, oVal, $el, index, selector) => {
+  /**
+   * 向x轴指定距离
+   * @param {Number} x
+   * @param {Function} callback
+   */
+  shiftX(x, callback) {
+    this.shift(x, 0, (nVal, oVal, $el, index, selector) => {
       let val = {
         x: nVal.x + oVal.x,
         y: oVal.y
       };
-      if (typeof fn === 'function') {
-        const x = fn.call(this, nVal.x, oVal.x, $el, index, selector);
+      if (typeof callback === 'function') {
+        const x = callback.call(this, nVal.x, oVal.x, $el, index, selector);
         if (typeof x === 'number') {
           val.x = x;
         }
@@ -242,14 +269,19 @@ export default class Selector {
     });
     return this;
   }
-  shiftY(dy, fn) {
-    this.shift(0, dy, (nVal, oVal, $el, index, selector) => {
+  /**
+   * 向y轴移动指定距离
+   * @param {Number} y
+   * @param {Function} callback
+   */
+  shiftY(y, callback) {
+    this.shift(0, y, (nVal, oVal, $el, index, selector) => {
       let val = {
         x: oVal.x,
         y: nVal.y + oVal.y
       };
-      if (typeof fn === 'function') {
-        const y = fn.call(this, nVal.y, oVal.y, $el, index, selector);
+      if (typeof callback === 'function') {
+        const y = callback.call(this, nVal.y, oVal.y, $el, index, selector);
         if (typeof y === 'number') {
           val.y = y;
         }
@@ -258,7 +290,12 @@ export default class Selector {
     });
     return this;
   }
-  rotate(angle, fn) {
+  /**
+   * 旋转指定角度
+   * @param {Number} angle
+   * @param {Function} callback
+   */
+  rotate(angle, callback) {
     this.attr('transform', ($el, index, select) => {
       let transform = $el.getAttribute('transform');
       transform = transform ? transform.split(' ') : [];
@@ -273,36 +310,21 @@ export default class Selector {
           oVal += parseFloat(rotate);
         }
       });
-      if (typeof fn === 'function') {
-        nVal = fn(nVal, oVal);
+      if (typeof callback === 'function') {
+        nVal = callback(nVal, oVal);
       }
       transform.push(`rotate(${nVal})`);
       return transform.join(' ');
     });
     return this;
   }
-  rotateTo(angle) {
-    this.attr('transform', ($el, index, select) => {
-      let transform = $el.getAttribute('transform');
-      transform = transform ? transform.split(' ') : [];
-
-      transform = transform.filter((item, index) => {
-        if (item.indexOf('rotate') === -1) {
-          return true;
-        }
-      });
-      transform.push(`rotate(${angle})`);
-      return transform.join(' ');
-    });
-    return this;
-  }
-  scale(rx, ry) {
+  scale(x, y) {
 
   }
-  scaleX(rx) {
+  scaleX(x) {
 
   }
-  scaleY(ry) {
+  scaleY(y) {
 
   }
   // http://stackoverflow.com/questions/13046811/how-to-determine-size-of-raphael-object-after-scaling-rotating-it/13111598#13111598
