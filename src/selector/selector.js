@@ -296,7 +296,7 @@ export default class Selector {
    * @param {Function} callback
    */
   rotate(angle, callback) {
-    this.attr('transform', ($el, index, select) => {
+    this.attr('transform', ($el, index, selector) => {
       let transform = $el.getAttribute('transform');
       transform = transform ? transform.split(' ') : [];
 
@@ -313,7 +313,11 @@ export default class Selector {
       if (typeof callback === 'function') {
         nVal = callback(nVal, oVal);
       }
-      transform.push(`rotate(${nVal})`);
+      // 选择元素并获取元素BBox
+      const bbox = new Selector($el).getBBox();
+      const cx = bbox.x + bbox.width / 2;
+      const cy = bbox.y + bbox.height / 2;
+      transform.push(`rotate(${nVal},${cx},${cy})`);
       return transform.join(' ');
     });
     return this;
@@ -352,7 +356,10 @@ export default class Selector {
     let maxY = Number.NEGATIVE_INFINITY;
 
     // 得到相对画布的坐标
-    const matrix = $el.getScreenCTM().inverse().multiply($svg.getScreenCTM());
+    const matrix = $el.getScreenCTM()
+      .inverse()
+      .multiply($svg.getScreenCTM())
+      .inverse();
     for (let i = 0, length = oldPoint.length; i < length; i++) {
       let point = $svg.createSVGPoint();
       point.x = oldPoint[i].x;
@@ -380,28 +387,28 @@ export default class Selector {
       height: maxY - minY
     };
   }
-  x() {
+  get x() {
     const bbox = this.getBBox();
     if (!bbox) {
       return null;
     }
     return bbox.x;
   }
-  y() {
+  get y() {
     const bbox = this.getBBox();
     if (!bbox) {
       return null;
     }
     return bbox.y;
   }
-  width() {
+  get width() {
     const bbox = this.getBBox();
     if (!bbox) {
       return null;
     }
     return bbox.width;
   }
-  height() {
+  get height() {
     const bbox = this.getBBox();
     if (!bbox) {
       return null;
