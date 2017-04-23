@@ -99,25 +99,24 @@ export default class Flowchart {
       })
     function move () {
       setTimeout(() => {
-        $shapes.rotate(5, function (n, o) {
-          return 90
-        })
-        // setTimeout(() => {
-        //   $shapes.translateX(300);
-        //   setTimeout(() => {
-        //     $shapes.translateY(300);
-        //     setTimeout(() => {
-        //       $shapes.shift(-100, -100);
-        //       setTimeout(() => {
-        //         $shapes.shiftX(-100);
-        //         setTimeout(() => {
-        //           $shapes.shiftY(-100);
-        //         }, 1000);
-        //       }, 1000);
-        //     }, 1000);
-        //   }, 1000);
-        // }, 1000);
-      }, 3000)
+        $shapes.rotate(-90 * Math.random()).shift(20, 30)
+        setTimeout(() => {
+          $shapes.shift(100, 80).rotate(90 * Math.random())
+          setTimeout(() => {
+            $shapes.shift(-100, -80).rotate(90 * Math.random())
+            setTimeout(() => {
+              $shapes.shift(-100, -100).rotate(90 * Math.random())
+              setTimeout(() => {
+                $shapes.shiftX(100).rotate(90 * Math.random())
+                setTimeout(() => {
+                  $shapes.shiftY(100).rotate(-360 * Math.random())
+                  move()
+                }, 1000)
+              }, 1000)
+            }, 1000)
+          }, 1000)
+        }, 1000)
+      }, 1000)
     }
     move()
     console.log($shapes.getBBox())

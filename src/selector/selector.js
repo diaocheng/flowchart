@@ -160,6 +160,13 @@ export default class Selector {
    */
   translate (x, y, callback) {
     this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      const $matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse()
+      const $xx = x * $matrix.a + y * $matrix.c + $matrix.e
+      console.log($xx)
       let transform = $el.getAttribute('transform')
       transform = transform ? transform.split(' ') : []
 
@@ -236,15 +243,13 @@ export default class Selector {
    * @param {Function} callback
    */
   shift (x, y, callback) {
-    this.translate(0, 0, (nVal, oVal, $el, index, selector) => {
-      let val = {
-        x: nVal.x + oVal.x,
-        y: nVal.y + oVal.y
-      }
-      if (typeof callback === 'function') {
-        val = callback.call(this, nVal, oVal, $el, index, selector) || val
-      }
-      return val
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse().translate(x, y)
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
     })
     return this
   }
@@ -254,19 +259,7 @@ export default class Selector {
    * @param {Function} callback
    */
   shiftX (x, callback) {
-    this.shift(x, 0, (nVal, oVal, $el, index, selector) => {
-      let val = {
-        x: nVal.x + oVal.x,
-        y: oVal.y
-      }
-      if (typeof callback === 'function') {
-        const x = callback.call(this, nVal.x, oVal.x, $el, index, selector)
-        if (typeof x === 'number') {
-          val.x = x
-        }
-      }
-      return val
-    })
+    this.shift(x, 0, callback)
     return this
   }
   /**
@@ -275,19 +268,7 @@ export default class Selector {
    * @param {Function} callback
    */
   shiftY (y, callback) {
-    this.shift(0, y, (nVal, oVal, $el, index, selector) => {
-      let val = {
-        x: oVal.x,
-        y: nVal.y + oVal.y
-      }
-      if (typeof callback === 'function') {
-        const y = callback.call(this, nVal.y, oVal.y, $el, index, selector)
-        if (typeof y === 'number') {
-          val.y = y
-        }
-      }
-      return val
-    })
+    this.shift(0, y, callback)
     return this
   }
   /**
