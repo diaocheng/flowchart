@@ -16,16 +16,5 @@ module.exports = {
   // https://github.com/feross/standard/blob/master/RULES.md#javascript-standard-style
   'extends': 'standard',
   // 规则
-  'rules': {
-    // generator函数名与function的空格
-    'generator-star-spacing': 0,
-    // 末尾分号
-    'semi': ['error', 'always'],
-    // 函数括号前面是否有空格
-    'space-before-function-paren': ['error', {
-      'anonymous': 'always',
-      'named': 'never',
-      'asyncArrow': 'always'
-    }]
-  }
+  'rules': {}
 }
