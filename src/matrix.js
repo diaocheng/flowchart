@@ -103,4 +103,7 @@ class Matrix {
     var b = Math.tan(y).toFixed(9)
     return this.plus(1, b, c, 1, 0, 0)
   }
+  toString () {
+      return `matrix(${this.a},${this.b},${this.c},${this.d},${this.e},${this.f})`
+  }
 }

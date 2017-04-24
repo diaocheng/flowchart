@@ -99,17 +99,17 @@ export default class Flowchart {
       })
     function move () {
       setTimeout(() => {
-        $shapes.rotate(-90 * Math.random()).shift(20, 30)
+        $shapes.rotate(-45).shift(20, 30).translateY(180).scale(2, 2)
         setTimeout(() => {
-          $shapes.shift(100, 80).rotate(90 * Math.random())
+          $shapes.shift(100, 80).rotate(45).scale(0.5, 0.5)
           setTimeout(() => {
-            $shapes.shift(-100, -80).rotate(90 * Math.random())
+            $shapes.shift(-100, -80).rotate(-45)
             setTimeout(() => {
-              $shapes.shift(-100, -100).rotate(90 * Math.random())
+              $shapes.shift(-100, -100).rotate(45)
               setTimeout(() => {
-                $shapes.shiftX(100).rotate(90 * Math.random())
+                $shapes.shiftX(100).rotate(-60)
                 setTimeout(() => {
-                  $shapes.shiftY(100).rotate(-360 * Math.random())
+                  $shapes.shiftY(100).rotate(60)
                   move()
                 }, 1000)
               }, 1000)

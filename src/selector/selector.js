@@ -161,42 +161,21 @@ export default class Selector {
   translate (x, y, callback) {
     this.attr('transform', ($el, index, selector) => {
       const $svg = $el.ownerSVGElement
-      const $matrix = $el.getScreenCTM()
+      const matrix = $el.getScreenCTM()
         .inverse()
         .multiply($svg.getScreenCTM())
         .inverse()
-      const $xx = x * $matrix.a + y * $matrix.c + $matrix.e
-      console.log($xx)
-      let transform = $el.getAttribute('transform')
-      transform = transform ? transform.split(' ') : []
-
-      // 防止改变全局x,y值
       let $x = x
       let $y = y
-
-      let ox = 0
-      let oy = 0
-      transform = transform.filter(item => {
-        if (item.indexOf('translate') === -1) {
-          return true
-        } else {
-          const translate = item.match(/\d+,\d+/)[0].split(',')
-          ox += parseFloat(translate[0]) || 0
-          oy += parseFloat(translate[1]) || 0
-        }
-      })
-
       if (typeof callback === 'function') {
-        // 传入新的值和原来的值，并返回求得的值
-        const nVal = { x: $x, y: $y }
-        const oVal = { x: ox, y: oy }
-        const translate = callback.call(this, nVal, oVal, $el, index, selector)
-        $x = translate.x
-        $y = translate.y
+        const translate = callback.call($el, $el, index, selector) || {}
+        $x = translate.x || x
+        $y = translate.y || y
       }
 
-      transform.push(`translate(${$x},${$y})`)
-      return transform.join(' ')
+      matrix.e = $x * matrix.a + $y * matrix.c
+      matrix.f = $x * matrix.b + $y * matrix.d
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
     })
     return this
   }
@@ -206,15 +185,19 @@ export default class Selector {
    * @param {Function} callback
    */
   translateX (x, callback) {
-    this.translate(x, 0, (nVal, oVal, $el, index, selector) => {
-      let val = {
-        x: nVal.x,
-        y: oVal.y
-      }
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse()
+      let $x = x
       if (typeof callback === 'function') {
-        val = callback.call(this, nVal, oVal, $el, index, selector) || val
+        $x = callback.call($el, $el, index, selector) || $x
       }
-      return val
+
+      matrix.e = $x * matrix.a
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
     })
     return this
   }
@@ -224,15 +207,19 @@ export default class Selector {
    * @param {Function} callback
    */
   translateY (y, callback) {
-    this.translate(0, y, (nVal, oVal, $el, index, selector) => {
-      let val = {
-        x: oVal.x,
-        y: nVal.y
-      }
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse()
+      let $y = y
       if (typeof callback === 'function') {
-        val = callback.call(this, nVal, oVal, $el, index, selector) || val
+        $y = callback.call($el, $el, index, selector) || $y
       }
-      return val
+
+      matrix.f = $y * matrix.d
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
     })
     return this
   }
@@ -245,10 +232,17 @@ export default class Selector {
   shift (x, y, callback) {
     this.attr('transform', ($el, index, selector) => {
       const $svg = $el.ownerSVGElement
+      let $x = x
+      let $y = y
+      if (typeof callback === 'function') {
+        const shift = callback.call($el, $el, index, selector) || {}
+        $x = shift.x || x
+        $y = shift.y || y
+      }
       const matrix = $el.getScreenCTM()
         .inverse()
         .multiply($svg.getScreenCTM())
-        .inverse().translate(x, y)
+        .inverse().translate($x, $y)
       return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
     })
     return this
@@ -259,7 +253,18 @@ export default class Selector {
    * @param {Function} callback
    */
   shiftX (x, callback) {
-    this.shift(x, 0, callback)
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      let $x = x
+      if (typeof callback === 'function') {
+        $x = callback.call($el, $el, index, selector) || $x
+      }
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse().translate($x, 0)
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
+    })
     return this
   }
   /**
@@ -268,7 +273,18 @@ export default class Selector {
    * @param {Function} callback
    */
   shiftY (y, callback) {
-    this.shift(0, y, callback)
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      let $y = y
+      if (typeof callback === 'function') {
+        $y = callback.call($el, $el, index, selector) || $y
+      }
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse().translate(0, $y)
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
+    })
     return this
   }
   /**
@@ -279,22 +295,65 @@ export default class Selector {
   rotate (angle, callback) {
     this.attr('transform', ($el, index, selector) => {
       const $svg = $el.ownerSVGElement
+      let $angle = angle
+      if (typeof callback === 'function') {
+        $angle = callback.call($el, $el, index, selector) || $angle
+      }
       const matrix = $el.getScreenCTM()
         .inverse()
         .multiply($svg.getScreenCTM())
-        .inverse().rotate(angle)
+        .inverse().rotate($angle)
       return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
     })
     return this
   }
-  scale (x, y) {
-
+  scale (x, y, callback) {
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      let $x = x
+      let $y = y
+      if (typeof callback === 'function') {
+        const scale = callback.call($el, $el, index, selector) || {}
+        $x = scale.x || x
+        $y = scale.y || y
+      }
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse().scaleNonUniform($x, $y)
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
+    })
+    return this
   }
-  scaleX (x) {
-
+  scaleX (x, callback) {
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      let $x = x
+      if (typeof callback === 'function') {
+        $x = callback.call($el, $el, index, selector) || $x
+      }
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse().scaleNonUniform($x, 1)
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
+    })
+    return this
   }
-  scaleY (y) {
-
+  scaleY (y, callback) {
+    this.attr('transform', ($el, index, selector) => {
+      const $svg = $el.ownerSVGElement
+      let $y = y
+      if (typeof callback === 'function') {
+        $y = callback.call($el, $el, index, selector) || $y
+      }
+      const matrix = $el.getScreenCTM()
+        .inverse()
+        .multiply($svg.getScreenCTM())
+        .inverse().scaleNonUniform(1, $y)
+      return `matrix(${matrix.a},${matrix.b},${matrix.c},${matrix.d},${matrix.e},${matrix.f})`
+    })
+    return this
   }
   // http://stackoverflow.com/questions/13046811/how-to-determine-size-of-raphael-object-after-scaling-rotating-it/13111598#13111598
   getBBox () {
